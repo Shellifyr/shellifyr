@@ -1,0 +1,7 @@
+# .shellifyrrc - Shellifyr's configuration!
+
+# Plugins (must be separated by spaces ex: "plugin1 plugin2 plugin3")
+PLUGINS=("welcome")
+
+# Extra .shellifyrrc config mode
+DEBUG_MODE=false

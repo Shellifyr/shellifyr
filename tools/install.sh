@@ -165,6 +165,10 @@ function _shellifyr_install_main {
     echo "$INIT_COMMAND" >> "$HOME/$INIT_FILE"
   fi
 
+  printf '%s%s' "$BLUE" "Generating your .shellifyrc file."
+  echo "$(cat ../templates/.shellifyrrc)" > "$HOME/.shellifyrrc"
+  printf '%s\n' "$NORMAL"
+
   _shellifyr_install_banner $selected_shell
 }
 
