@@ -1,6 +1,6 @@
 # Welcome
 
-This plugin simply displays a welcome message to the user, followed by the current time, every time a new session is launched.
+This plugin simply displays a welcome message to the user, every time a new session is launched.
 
 To use it, add `welcome` to the plugins array in your `.shellifyrrc` file.
 
