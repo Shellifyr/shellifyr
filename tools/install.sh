@@ -129,7 +129,7 @@ function _shellifyr_install_main {
     exit 1
   fi
 
-  echo "$INIT_COMMAND" >> "$INIT_FILE"
+  echo "$INIT_COMMAND" >> "$HOME/$INIT_FILE"
 
   _shellifyr_install_banner
 }
