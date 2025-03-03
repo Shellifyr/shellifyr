@@ -10,7 +10,7 @@ WIP_SHELLS=("bash zsh")
 function _clone_repo {
   printf "%sCloning Shellifyr's repository...%s\n" "$BLUE" "$NORMAL"
   if type -P git &>/dev/null; then
-    git clone $GITHUB_REPO ~/.shellifyr &>/dev/null
+    git clone $GITHUB_REPO $HOME/.shellifyr &>/dev/null
   else
     printf "%s%s" "$RED" "$BOLD"
     printf "FATAL: You don't have git installed in your system."
@@ -166,7 +166,7 @@ function _shellifyr_install_main {
   fi
 
   printf '%s%s' "$BLUE" "Generating your .shellifyrc file."
-  echo "$(cat ../templates/.shellifyrrc)" > "$HOME/.shellifyrrc"
+  echo "$(cat $HOME/.shellifyr/templates/.shellifyrrc)" > "$HOME/.shellifyrrc"
   printf '%s\n' "$NORMAL"
 
   _shellifyr_install_banner $selected_shell
