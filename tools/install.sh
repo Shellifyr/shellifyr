@@ -13,7 +13,7 @@ function _get_ini_value {
   awk -F '=' -v section="$section" -v key="$key" '
     $0 ~ "\\["section"\\]"{flag=1}
     flag && $1 ~ key {print $2; exit}
-  ' ~/.shellifyr/shell_paths.ini | tr -d '[:space:]'
+  ' ~/.shellifyr/shell_paths.ini
 }
 
 function _get_shell_category_color {
@@ -129,7 +129,7 @@ function _shellifyr_install_main {
     exit 1
   fi
 
-  echo "$INIT_COMMAND" >> "$HOME/$INIT_FILE"
+  echo "$INIT_COMMAND" >> "$INIT_FILE"
 
   _shellifyr_install_banner
 }
