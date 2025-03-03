@@ -63,14 +63,14 @@ function _shellifyr_install_main {
   set -e 
 
   printf "%sCloning Shellifyr's repository...%s\n" "$BLUE" "$NORMAL"
-#  if type -P git &>/dev/null; then
-#    git clone $GITHUB_REPO ~/.shellifyr
-#  else
-#    printf "%s%s" "$RED" "$BOLD"
-#    printf "FATAL: You don't have git installed in your system."
-#    printf "%s\n" "$NORMAL"
-#    exit
-#  fi
+  if type -P git &>/dev/null; then
+    git clone $GITHUB_REPO ~/.shellifyr
+  else
+    printf "%s%s" "$RED" "$BOLD"
+    printf "FATAL: You don't have git installed in your system."
+    printf "%s\n" "$NORMAL"
+    exit
+  fi
 
   # Display a choice input for the user to select the desired shell to apply Shellifyr.
   printf "%sGetting the user's shells installed in the system...%s\n" "$BLUE" "$NORMAL"
@@ -129,7 +129,7 @@ function _shellifyr_install_main {
     exit 1
   fi
 
-  echo "$INIT_COMMAND" >> "$INIT_FILE"
+  echo "$INIT_COMMAND" >> "$HOME/$INIT_FILE"
 
   _shellifyr_install_banner
 }
