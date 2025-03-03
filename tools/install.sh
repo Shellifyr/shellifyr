@@ -7,6 +7,15 @@ GITHUB_REPO="https://github.com/Shellifyr/shellifyr.git"
 STABLE_SHELLS=()
 WIP_SHELLS=("bash zsh")
 
+function _get_ini_value {
+  local section=$1
+  local key=$2
+  awk -F '=' -v section="$section" -v key="$key" '
+    $0 ~ "\\["section"\\]"{flag=1}
+    flag && $1 ~ key {print $2; exit}
+  ' ~/.shellifyr/shell_paths.ini | tr -d '[:space:]'
+}
+
 function _get_shell_category_color {
   local shell_name=$1
   if [[ "$STABLE_SHELLS" =~ (^|[[:space:]])$shell_name([[:space:]]|$) ]]; then
@@ -54,14 +63,14 @@ function _shellifyr_install_main {
   set -e 
 
   printf "%sCloning Shellifyr's repository...%s\n" "$BLUE" "$NORMAL"
-  #if type -P git &>/dev/null; then
-  #  git clone $GITHUB_REPO ~/.shellifyr
-  #else
-  #  printf "%s%s" "$RED" "$BOLD"
-  #  printf "FATAL: You don't have git installed in your system."
-  #  printf "%s\n" "$NORMAL"
-  #  exit
-  #fi
+#  if type -P git &>/dev/null; then
+#    git clone $GITHUB_REPO ~/.shellifyr
+#  else
+#    printf "%s%s" "$RED" "$BOLD"
+#    printf "FATAL: You don't have git installed in your system."
+#    printf "%s\n" "$NORMAL"
+#    exit
+#  fi
 
   # Display a choice input for the user to select the desired shell to apply Shellifyr.
   printf "%sGetting the user's shells installed in the system...%s\n" "$BLUE" "$NORMAL"
@@ -110,6 +119,17 @@ function _shellifyr_install_main {
     fi
   done
   printf '%s' "$NORMAL"
+  
+  INIT_FILE=$(_get_ini_value "$selected_shell" "init_file")
+  INIT_COMMAND=$(_get_ini_value "$selected_shell" "init_command")
+
+  # Verify if the shell is supported
+  if [[ -z "$INIT_FILE" || -z "$INIT_COMMAND" ]]; then
+    printf '%s%s%s%s\n' "$RED" "$BOLD" "Shell '$selected_shell' not supported or missing configuration." "$NORMAL"
+    exit 1
+  fi
+
+  echo "$INIT_COMMAND" >> "$INIT_FILE"
 
   _shellifyr_install_banner
 }
