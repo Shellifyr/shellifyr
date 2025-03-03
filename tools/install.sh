@@ -7,6 +7,18 @@ GITHUB_REPO="https://github.com/Shellifyr/shellifyr.git"
 STABLE_SHELLS=()
 WIP_SHELLS=("bash zsh")
 
+function _clone_repo {
+  printf "%sCloning Shellifyr's repository...%s\n" "$BLUE" "$NORMAL"
+  if type -P git &>/dev/null; then
+    git clone $GITHUB_REPO ~/.shellifyr &>/dev/null
+  else
+    printf "%s%s" "$RED" "$BOLD"
+    printf "FATAL: You don't have git installed in your system."
+    printf "%s\n" "$NORMAL"
+    exit
+  fi
+}
+
 function _get_ini_value {
   local section=$1
   local key=$2
@@ -28,8 +40,9 @@ function _get_shell_category_color {
 }
 
 function _shellifyr_install_banner {
+  local shell=$1
   printf '%s' "$GREEN"
-  printf 'Your shell is now SHELLYFIED!'
+  printf '%s is now SHELLIFYED!' "$shell"
   printf '%s\n' "$NORMAL"
 }
 
@@ -62,14 +75,31 @@ function _shellifyr_install_main {
 
   set -e 
 
-  printf "%sCloning Shellifyr's repository...%s\n" "$BLUE" "$NORMAL"
-  if type -P git &>/dev/null; then
-    git clone $GITHUB_REPO ~/.shellifyr
-  else
-    printf "%s%s" "$RED" "$BOLD"
-    printf "FATAL: You don't have git installed in your system."
+  if [[ -d "$HOME/.shellifyr" ]]; then
+    printf "%s%s" "$YELLOW" "$BOLD"
+    printf "Shellifyr's repository is already installed in your system, would you like to re-install it? [y/N]: "
+    printf "%s" "$NORMAL"
+    read -r reinstall_choice
     printf "%s\n" "$NORMAL"
-    exit
+
+    local choice_lower=$(echo $reinstall_choice | tr '[:upper:]' '[:lower:]')
+
+    if [[ $choice_lower == "y" ]]; then
+      rm -rf ~/.shellifyr
+      _clone_repo
+    elif [[ $choice_lower == "n" ]]; then
+      printf "%s" "$BLUE"
+      printf "Not reinstalling. Closing..."
+      printf "%s\n" "$NORMAL"
+      exit 1
+    else 
+      printf "%s" "$BLUE"
+      printf "Not a valid response. Not reinstalling. Closing..."
+      printf "%s\n" "$NORMAL"
+      exit 1
+    fi
+  else 
+    _clone_repo
   fi
 
   # Display a choice input for the user to select the desired shell to apply Shellifyr.
@@ -108,14 +138,15 @@ function _shellifyr_install_main {
   # Ask user input
   while true; do 
     printf '%s' "$BLUE"
-    read -rp "Select the shell number to apply Shellifyr: " choice
+    printf 'Select the shell number to apply Shellifyr: '
+    printf "%s" "$NORMAL"
+    read -r choice
     if [[ "$choice" =~ ^[0-9]+$ ]] && ((choice >= 0 && choice < ${#SORTED_SHELLS[@]})); then 
       selected_shell="${SORTED_SHELLS[$choice]}"
       break
     else
-      printf '%s%s' "$RED" "Invalid option. Please insert "   
-      printf '%s%s' "$BOLD" "one of the shell numbers available above.\n"
-      printf '%s' "$NORMAL"
+      printf '%s%s' "$RED" "Invalid option. Please insert one of the shell numbers available above."   
+      printf '%s\n' "$NORMAL"
     fi
   done
   printf '%s' "$NORMAL"
@@ -125,13 +156,16 @@ function _shellifyr_install_main {
 
   # Verify if the shell is supported
   if [[ -z "$INIT_FILE" || -z "$INIT_COMMAND" ]]; then
-    printf '%s%s%s%s\n' "$RED" "$BOLD" "Shell '$selected_shell' not supported or missing configuration." "$NORMAL"
+    printf '%s%s%s%s\n' "$RED" "$BOLD" "Shell '$selected_shell' not supported or missing configuration. Deleting ~/.shellifyr..." "$NORMAL"
+    rm -rf ~/.shellifyr
     exit 1
   fi
 
-  echo "$INIT_COMMAND" >> "$HOME/$INIT_FILE"
+  if ! grep -q "$INIT_COMMAND" "$HOME/$INIT_FILE"; then
+    echo "$INIT_COMMAND" >> "$HOME/$INIT_FILE"
+  fi
 
-  _shellifyr_install_banner
+  _shellifyr_install_banner $selected_shell
 }
 
 _shellifyr_install_main
