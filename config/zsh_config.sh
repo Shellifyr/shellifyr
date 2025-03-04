@@ -4,6 +4,7 @@ export SHELLIFYR_HOME="$HOME/.shellifyr"
 # path to some config files
 CONFIG_FILE="$HOME/.shellifyrrc"
 PLUGINS_DIR="$SHELLIFYR_HOME/plugins"
+THEMES_DIR="$SHELLIFYR_HOME/themes"
 
 # Current shell name
 CURRENT_SHELL="zsh"
@@ -93,7 +94,6 @@ if [[ -f "$CONFIG_FILE" ]]; then
   fi
 else
   printf '%s%s%s' "$FMT_RED" "$FMT_BOLD" "FATAL: .shellifyrrc not found."
-  exit 1
 fi 
 
 # Loads active plugins
@@ -124,20 +124,33 @@ for plugin in "${PLUGINS[@]}"; do
   fi 
 done
 
-THEME_FILE="$SHELLIFYR_HOME/themes/frosty.theme"
+# Load active theme
+THEME_FILE="$SHELLIFYR_HOME/themes/$SHYR_THEME/$SHYR_THEME.theme"
 
 if [[ -f "$THEME_FILE" ]]; then
-  source "$THEME_FILE"
-  if [[ $DEBUG_MODE == true ]]; then
-    printf '%s%s' "$FMT_BLUE" "DEBUG: 'frosty' theme successfully loaded."
+  # Extracts the compatibility available
+  COMPATIBILITY=$(awk -F ': ' '/^# Shell:/ {print $2}' "$THEME_FILE")
+
+  if [[ -z "$COMPATIBILITY" || "$COMPATIBILITY" == *"$CURRENT_SHELL"* ]]; then 
+    if [[ $DEBUG_MODE == true ]]; then 
+      printf '%s%s' "$FMT_BLUE" "DEBUG: '$SHYR_THEME' loading."
+      printf '%s\n' "$FMT_RESET"
+    fi
+    source "$THEME_FILE"
+
+    # Define Prompt
+    if [[ -n "$THEME_PROMPT" ]]; then
+      export PS1="$THEME_PROMPT"
+    fi
+
+    if [[ $DEBUG_MODE == true ]]; then 
+      printf '%s%s' "$FMT_BLUE" "DEBUG: '$SHYR_THEME' theme successfully loaded."
+      printf '%s\n' "$FMT_RESET"
+    fi
+  else 
+    printf '%s%s%s' "$FMT_YELLOW" "$FMT_BOLD" "Theme '$SHYR_THEME' not compatible with $CURRENT_SHELL (only with: $COMPATIBILITY)."
     printf '%s\n' "$FMT_RESET"
   fi
 else
-  printf '%s%s' "$FMT_RED" "FATAL: frosty' theme not found."
-  exit 1
-fi
-
-# Define Prompt
-if [[ -n "$THEME_PROMPT" ]]; then
-  export PS1="$THEME_PROMPT"
+  printf '%s%s' "$FMT_RED" "FATAL: '$SHYR_THEME' theme not found."
 fi

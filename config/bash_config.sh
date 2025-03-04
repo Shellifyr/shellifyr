@@ -6,7 +6,7 @@ CONFIG_FILE="$HOME/.shellifyrrc"
 PLUGINS_DIR="$SHELLIFYR_HOME/plugins"
 
 # Current shell name
-CURRENT_SHELL="zsh"
+CURRENT_SHELL="bash"
 
 # The [ -t 1 ] check only works when the function is not called from
 # a subshell (like in `$(...)` or `(...)`, so this hack redefines the
@@ -123,3 +123,34 @@ for plugin in "${PLUGINS[@]}"; do
     printf '%s\n' "$FMT_RESET"
   fi 
 done
+
+# Load active theme
+THEME_FILE="$SHELLIFYR_HOME/themes/$SHYR_THEME/$SHYR_THEME.theme"
+
+if [[ -f "$THEME_FILE" ]]; then
+  # Extracts the compatibility available
+  COMPATIBILITY=$(awk -F ': ' '/^# Shell:/ {print $2}' "$THEME_FILE")
+
+  if [[ -z "$COMPATIBILITY" || "$COMPATIBILITY" == *"$CURRENT_SHELL"* ]]; then 
+    if [[ $DEBUG_MODE == true ]]; then 
+      printf '%s%s' "$FMT_BLUE" "DEBUG: '$SHYR_THEME' loading."
+      printf '%s\n' "$FMT_RESET"
+    fi
+    source "$THEME_FILE"
+
+    # Define Prompt
+    if [[ -n "$THEME_PROMPT" ]]; then
+      export PS1="$THEME_PROMPT"
+    fi
+
+    if [[ $DEBUG_MODE == true ]]; then 
+      printf '%s%s' "$FMT_BLUE" "DEBUG: '$SHYR_THEME' theme successfully loaded."
+      printf '%s\n' "$FMT_RESET"
+    fi
+  else 
+    printf '%s%s%s' "$FMT_YELLOW" "$FMT_BOLD" "Theme '$SHYR_THEME' not compatible with $CURRENT_SHELL (only with: $COMPATIBILITY)."
+    printf '%s\n' "$FMT_RESET"
+  fi
+else
+  printf '%s%s' "$FMT_RED" "FATAL: '$SHYR_THEME' theme not found."
+fi

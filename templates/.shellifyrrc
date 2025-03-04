@@ -1,5 +1,8 @@
 # .shellifyrrc - Shellifyr's configuration!
 
+# Your theme.
+SHYR_THEME="frosty"
+
 # Plugins (must be separated by spaces ex: "plugin1 plugin2 plugin3")
 PLUGINS=("welcome")
 

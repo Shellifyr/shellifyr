@@ -1,4 +1,19 @@
-# Frosty Theme
+# Theme: frosty
+# Creator: jappend
+# Shell: zsh
+# Shell: bash
+
+# Detects the current shell. This will later be used to identify which commands
+# should be userd and for which shell. This bit of code is REQUIRED for the theme to work for in 
+# between comaptible shells.
+
+if [ -n "$ZSH_VERSION" ]; then
+  SHELL_NAME="zsh"
+elif [ -n "$BASH_VERSION" ]; then
+  SHELL_NAME="bash"
+else 
+  return
+fi
 
 # The [ -t 1 ] check only works when the function is not called from
 # a subshell (like in `$(...)` or `(...)`, so this hack redefines the
@@ -83,17 +98,22 @@ function _git_prompt_info {
 }
 
 # Prompt Style
-export THEME_PROMPT="$FMT_BLUE➡️ %~%f $(_git_prompt_info) $"
-
-# Colors
-export THEME_BACKGROUND="#1e1e1e"
-export THEME_FOREGROUND="#ffffff"
-export THEME_PRIMARY="#ff79c6"
-export THEME_SECONDARY="#8be9fd"
-
-# Zsh-specific: Add precmd hook to update prompt every time the directory changes
-precmd() {
-  # Force the prompt to update with the latest git information
-  export THEME_PROMPT="$FMT_BLUE➡️  %~%f $(_git_prompt_info) "
-  export PS1="$THEME_PROMPT"
+# If you know the differenecs between bash and zsh, you may know that zsh doesn't know 
+# what "\w" means. To solve that and show the directory in both bash in zsh
+# we need to treat the Shell's differently. In this example, I use the SHELL_NAME
+# variable that was set up in the start of the file to set up the prompt correctly.
+function _update_prompt {
+  if [ "$SHELL_NAME" = "bash" ]; then
+    PS1="${FMT_BLUE}➡️   \w ${FMT_BOLD}$(_git_prompt_info) ${FMT_RESET}$ "
+  elif [ "$SHELL_NAME" = "zsh" ]; then
+    PS1="${FMT_BLUE}➡️   %~ ${FMT_BOLD}$(_git_prompt_info) ${FMT_RESET}$ "
+  fi
 }
+
+# Config for each shell
+if [ "$SHELL_NAME" = "zsh" ]; then
+  precmd() { _update_prompt; }  
+  export PROMPT="$PS1"
+elif [ "$SHELL_NAME" = "bash" ]; then
+  export PROMPT_COMMAND=_update_prompt
+fi

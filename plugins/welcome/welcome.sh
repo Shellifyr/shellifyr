@@ -1,7 +1,8 @@
 # Plugin: Welcome
 # Description: Prints a simple welcome message when the session starts.
 # Creator: jappend
-# Shell: bash, zsh
+# Shell: bash
+# Shell: zsh
 
 # The [ -t 1 ] check only works when the function is not called from
 # a subshell (like in `$(...)` or `(...)`, so this hack redefines the
