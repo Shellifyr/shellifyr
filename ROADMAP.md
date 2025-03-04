@@ -21,4 +21,5 @@ This roadmap defines the main steps for Shellifyr's project, this will change ac
 ## 🛠 **v1.0:** First Release!
 - [ ] Create the **complete documentation.**
 - [ ] Create the **official website** (`shellifyr.github.io`).
+- [ ] Configure the `.github/` folder and create templates.
 - [ ] Search for ways to make the framework faster and have better performance.
