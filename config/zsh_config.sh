@@ -5,7 +5,8 @@ export SHELLIFYR_HOME="$HOME/.shellifyr"
 CONFIG_FILE="$HOME/.shellifyrrc"
 PLUGINS_DIR="$SHELLIFYR_HOME/plugins"
 
-CURRENT_SHELL=$(basename "$SHELL")
+# Current shell name
+CURRENT_SHELL="zsh"
 
 # The [ -t 1 ] check only works when the function is not called from
 # a subshell (like in `$(...)` or `(...)`, so this hack redefines the
@@ -95,11 +96,11 @@ fi
 
 # Loads active plugins
 for plugin in "${PLUGINS[@]}"; do 
-  # Extracts the compatibility available
-  COMPATIBILITY=$(awk -F ': ' '/^# Shell:/ {print $2}' "$CONFIG_FILE")
-
   # If the plugin doesn't specify compatibility, it assumes it is.
   PLUGIN_FILE="$PLUGINS_DIR/$plugin/$plugin.sh"
+  # Extracts the compatibility available
+  COMPATIBILITY=$(awk -F ': ' '/^# Shell:/ {print $2}' "$PLUGIN_FILE")
+
   if [[ -f "$PLUGIN_FILE" ]]; then
     if [[ -z "$COMPATIBILITY" || "$COMPATIBILITY" == *"$CURRENT_SHELL"* ]]; then 
       if [[ $DEBUG_MODE == true ]]; then
@@ -112,7 +113,7 @@ for plugin in "${PLUGINS[@]}"; do
         printf '%s\n' "$FMT_RESET"
       fi
     else 
-      printf '%s%s%s' "$FMT_YELLOW" "$FMT_BOLD" "Plugin '$plugin' not compatible with $CURRENT_SELL (only with: $COMPATIBILITY)."
+      printf '%s%s%s' "$FMT_YELLOW" "$FMT_BOLD" "Plugin '$plugin' not compatible with $CURRENT_SHELL (only with: $COMPATIBILITY)."
       printf '%s\n' "$FMT_RESET"
     fi
   else
