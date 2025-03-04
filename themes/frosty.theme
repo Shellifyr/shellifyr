@@ -75,8 +75,16 @@ function _setup_color {
 }
 _setup_color
 
+git_prompt_info {
+  git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+  if [[ -n "$git_branch" ]]; then
+    echo " ($git_branch)"
+  fi
+}
+
 # Prompt Style
-export THEME_PROMPT='%F{FMT_GREEN}%n@%m%f %F{FMT_BLUE}%~%f $(git_prompt_info)'
+echo hi
+export THEME_PROMPT="$FMT_GREEN%n@%m%f $FMT_BLUE%~%f \$(git_prompt_info)"
 
 # Colors
 export THEME_BACKGROUND="#1e1e1e"
@@ -84,9 +92,3 @@ export THEME_FOREGROUND="#ffffff"
 export THEME_PRIMARY="#ff79c6"
 export THEME_SECONDARY="#8be9fd"
 
-git_prompt_info() {
-  git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
-  if [[ -n "$git_branch" ]]; then
-    echo " ($git_branch)"
-  fi
-}
