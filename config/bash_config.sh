@@ -6,7 +6,7 @@ CONFIG_FILE="$HOME/.shellifyrrc"
 PLUGINS_DIR="$SHELLIFYR_HOME/plugins"
 
 # Current shell name
-CURRENT_SHELL="bash"
+CURRENT_SHELL="zsh"
 
 # The [ -t 1 ] check only works when the function is not called from
 # a subshell (like in `$(...)` or `(...)`, so this hack redefines the
@@ -82,6 +82,8 @@ function _setup_color {
   FMT_RESET=$(printf '\033[0m')
 }
 
+_setup_color
+
 # Checks if the config file exists
 if [[ -f "$CONFIG_FILE" ]]; then
   source "$CONFIG_FILE"
@@ -98,10 +100,10 @@ fi
 for plugin in "${PLUGINS[@]}"; do 
   # If the plugin doesn't specify compatibility, it assumes it is.
   PLUGIN_FILE="$PLUGINS_DIR/$plugin/$plugin.sh"
-  # Extracts the compatibility available
-  COMPATIBILITY=$(awk -F ': ' '/^# Shell:/ {print $2}' "$PLUGIN_FILE")
 
   if [[ -f "$PLUGIN_FILE" ]]; then
+    # Extracts the compatibility available
+    COMPATIBILITY=$(awk -F ': ' '/^# Shell:/ {print $2}' "$PLUGIN_FILE")
     if [[ -z "$COMPATIBILITY" || "$COMPATIBILITY" == *"$CURRENT_SHELL"* ]]; then 
       if [[ $DEBUG_MODE == true ]]; then
         printf '%s%s' "$FMT_BLUE" "DEBUG: loading '$plugin' plugin..."
