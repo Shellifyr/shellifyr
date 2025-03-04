@@ -123,3 +123,21 @@ for plugin in "${PLUGINS[@]}"; do
     printf '%s\n' "$FMT_RESET"
   fi 
 done
+
+THEME_FILE="$SHELLIFYR_HOME/themes/frosty.theme"
+
+if [[ -f "$THEME_FILE" ]]; then
+  source "$THEME_FILE"
+  if [[ $DEBUG_MODE == true ]]; then
+    printf '%s%s' "$FMT_BLUE" "DEBUG: 'frosty' theme successfully loaded."
+    printf '%s\n' "$FMT_RESET"
+  fi
+else
+  printf '%s%s' "$FMT_RED" "FATAL: frosty' theme not found."
+  exit 1
+fi
+
+# Define Prompt
+if [[ -n "$THEME_PROMPT" ]]; then
+  export PS1="$THEME_PROMPT "
+fi
