@@ -83,7 +83,7 @@ function _git_prompt_info {
 }
 
 # Prompt Style
-export THEME_PROMPT="$FMT_GREEN%n@%m%f $FMT_BLUE%~%f $(_git_prompt_info) $"
+export THEME_PROMPT="$FMT_BLUE➡️ %~%f $(_git_prompt_info) $"
 
 # Colors
 export THEME_BACKGROUND="#1e1e1e"
@@ -94,6 +94,6 @@ export THEME_SECONDARY="#8be9fd"
 # Zsh-specific: Add precmd hook to update prompt every time the directory changes
 precmd() {
   # Force the prompt to update with the latest git information
-  export THEME_PROMPT="$FMT_GREEN%n@%m%f $FMT_BLUE%~%f $(_git_prompt_info)$ "
+  export THEME_PROMPT="$FMT_BLUE➡️  %~%f $(_git_prompt_info) "
   export PS1="$THEME_PROMPT"
 }
