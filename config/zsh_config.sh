@@ -139,5 +139,5 @@ fi
 
 # Define Prompt
 if [[ -n "$THEME_PROMPT" ]]; then
-  export PS1="$THEME_PROMPT "
+  export PS1="$THEME_PROMPT"
 fi

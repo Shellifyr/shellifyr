@@ -75,16 +75,15 @@ function _setup_color {
 }
 _setup_color
 
-git_prompt_info {
+function _git_prompt_info {
   git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
   if [[ -n "$git_branch" ]]; then
-    echo " ($git_branch)"
+    echo "($git_branch)"
   fi
 }
 
 # Prompt Style
-echo hi
-export THEME_PROMPT="$FMT_GREEN%n@%m%f $FMT_BLUE%~%f \$(git_prompt_info)"
+export THEME_PROMPT="$FMT_GREEN%n@%m%f $FMT_BLUE%~%f $(_git_prompt_info) $"
 
 # Colors
 export THEME_BACKGROUND="#1e1e1e"
@@ -92,3 +91,9 @@ export THEME_FOREGROUND="#ffffff"
 export THEME_PRIMARY="#ff79c6"
 export THEME_SECONDARY="#8be9fd"
 
+# Zsh-specific: Add precmd hook to update prompt every time the directory changes
+precmd() {
+  # Force the prompt to update with the latest git information
+  export THEME_PROMPT="$FMT_GREEN%n@%m%f $FMT_BLUE%~%f $(_git_prompt_info)$ "
+  export PS1="$THEME_PROMPT"
+}
