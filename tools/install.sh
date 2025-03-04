@@ -1,5 +1,7 @@
 #/bin/sh
 
+set -e 
+
 # Variables
 GITHUB_REPO="https://github.com/Shellifyr/shellifyr.git"
 
@@ -7,15 +9,101 @@ GITHUB_REPO="https://github.com/Shellifyr/shellifyr.git"
 STABLE_SHELLS=()
 WIP_SHELLS=("bash zsh")
 
+# The [ -t 1 ] check only works when the function is not called from
+# a subshell (like in `$(...)` or `(...)`, so this hack redefines the
+# function at the top level to always return false when stdout is not
+# a tty.
+if [ -t 1 ]; then
+  is_tty() {
+    true
+  }
+else
+  is_tty() {
+    false
+  }
+fi
+
+function _supports_truecolor {
+  case "$COLORTERM" in
+  truecolor|24bit) return 0 ;;
+  esac
+
+  case "$TERM" in
+  iterm           |\
+  tmux-truecolor  |\
+  linux-truecolor |\
+  xterm-truecolor |\
+  screen-truecolor) return 0 ;;
+  esac
+
+  return 1
+}
+
+function _setup_color {
+  # Only use colors if connected to a terminal
+  if ! is_tty; then
+    FMT_RAINBOW=""
+    FMT_RED=""
+    FMT_GREEN=""
+    FMT_YELLOW=""
+    FMT_BLUE=""
+    FMT_BOLD=""
+    FMT_RESET=""
+    return
+  fi
+
+  if _supports_truecolor; then
+    FMT_RAINBOW="
+      $(printf '\033[38;2;255;0;0m')
+      $(printf '\033[38;2;255;97;0m')
+      $(printf '\033[38;2;247;255;0m')
+      $(printf '\033[38;2;0;255;30m')
+      $(printf '\033[38;2;77;0;255m')
+      $(printf '\033[38;2;168;0;255m')
+      $(printf '\033[38;2;245;0;172m')
+    "
+  else
+    FMT_RAINBOW="
+      $(printf '\033[38;5;196m')
+      $(printf '\033[38;5;202m')
+      $(printf '\033[38;5;226m')
+      $(printf '\033[38;5;082m')
+      $(printf '\033[38;5;021m')
+      $(printf '\033[38;5;093m')
+      $(printf '\033[38;5;163m')
+    "
+  fi
+
+  FMT_RED=$(printf '\033[31m')
+  FMT_GREEN=$(printf '\033[32m')
+  FMT_YELLOW=$(printf '\033[33m')
+  FMT_BLUE=$(printf '\033[34m')
+  FMT_BOLD=$(printf '\033[1m')
+  FMT_RESET=$(printf '\033[0m')
+}
+
+function _fmt_info {
+  printf '%sINFO: %s%s' "${FMT_BOLD}" "${FMT_BLUE}" "$*" 
+  printf '%s\n' "$FMT_RESET"
+}
+
+function _fmt_error {
+  printf '%sERROR: %s%s' "${FMT_BOLD}" "${FMT_YELLOW}" "$*" 
+  printf '%s\n' "$FMT_RESET"
+}
+
+function _fmt_fatal {
+  printf '%sFATAL: %s%s' "${FMT_BOLD}" "${FMT_RED}" "$*" 
+  printf '%s\n' "$FMT_RESET"
+}
+
 function _clone_repo {
-  printf "%sCloning Shellifyr's repository...%s\n" "$BLUE" "$NORMAL"
+  _fmt_info "Cloning Shellifyr's repository..."
   if type -P git &>/dev/null; then
     git clone $GITHUB_REPO $HOME/.shellifyr &>/dev/null
   else
-    printf "%s%s" "$RED" "$BOLD"
-    printf "FATAL: You don't have git installed in your system."
-    printf "%s\n" "$NORMAL"
-    exit
+    _fmt_fatal "You don't have git installed in your system."
+    exit 1
   fi
 }
 
@@ -31,56 +119,25 @@ function _get_ini_value {
 function _get_shell_category_color {
   local shell_name=$1
   if [[ "$STABLE_SHELLS" =~ (^|[[:space:]])$shell_name([[:space:]]|$) ]]; then
-    printf '%s' "$GREEN"
+    printf '%s' "${FMT_GREEN}"
   elif [[ "$WIP_SHELLS" =~ (^|[[:space:]])$shell_name([[:space:]]|$) ]]; then
-    printf '%s' "$YELLOW"
+    printf '%s' "${FMT_YELLOW}"
   else
-    printf '%s' "$RED"
+    printf '%s' "${FMT_RED}"
   fi 
 }
 
 function _shellifyr_install_banner {
   local shell=$1
-  printf '%s' "$GREEN"
-  printf '%s is now SHELLIFYED!' "$shell"
-  printf '%s\n' "$NORMAL"
+  printf '%s%s%s\n' "${FMT_GREEN}" "$shell is now SHELLIFYED!" "${FMT_RESET}"
 }
 
 function _shellifyr_install_main {
-  # Set and use colors, but only if the are supported by the terminal.
-  local number_colors_supported=
-  if type -P tput &>/dev/null; then
-    number_colors_supported=$(tput colors 2>/dev/null || tput Co 2>/dev/null || echo -1)
-  fi 
-
-  local RED GREEN YELLOW BLUE BOLD NORMAL
-  if [[ -t 1 && $number_colors_supported && $number_colors_supported -ge 8 ]]; then
-    RED=$(tput setaf 1 2>/dev/null || tput AF 1 2>/dev/null)
-    GREEN=$(tput setaf 2 2>/dev/null || tput AF 2 2>/dev/null)
-    YELLOW=$(tput setaf 3 2>/dev/null || tput AF 3 2>/dev/null)
-    BLUE=$(tput setaf 4 2>/dev/null || tput AF 4 2>/dev/null)
-    BOLD=$(tput bold 2>/dev/null || tput md 2>/dev/null)
-    NORMAL=$(tput sgr0 2>/dev/null || tput me 2>/dev/null)
-  else
-    RED=""
-    GREEN=""
-    YELLOW=""
-    BLUE=""
-    BOLD=""
-    NORMAL=""
-  fi
-
-  # Only enable exit-on-error after the non-critical color error stuff
-  # Which may fail in systems that lack tpuf
-
-  set -e 
-
+  _setup_color
   if [[ -d "$HOME/.shellifyr" ]]; then
-    printf "%s%s" "$YELLOW" "$BOLD"
-    printf "Shellifyr's repository is already installed in your system, would you like to re-install it? [y/N]: "
-    printf "%s" "$NORMAL"
+    printf '%s%s' "${FMT_YELLOW}" "Shellifyr's repository is already installed in your system, would you like to re-install it? [y/N]: " 
     read -r reinstall_choice
-    printf "%s\n" "$NORMAL"
+    printf '%s\n' "${FMT_RESET}"
 
     local choice_lower=$(echo $reinstall_choice | tr '[:upper:]' '[:lower:]')
 
@@ -88,14 +145,10 @@ function _shellifyr_install_main {
       rm -rf ~/.shellifyr
       _clone_repo
     elif [[ $choice_lower == "n" ]]; then
-      printf "%s" "$BLUE"
-      printf "Not reinstalling. Closing..."
-      printf "%s\n" "$NORMAL"
+      _fmt_info "Not reinstalling. Closing..."
       exit 1
     else 
-      printf "%s" "$BLUE"
-      printf "Not a valid response. Not reinstalling. Closing..."
-      printf "%s\n" "$NORMAL"
+      _fmt_info "Not a valid response. Not reinstalling. Closing..."
       exit 1
     fi
   else 
@@ -103,7 +156,7 @@ function _shellifyr_install_main {
   fi
 
   # Display a choice input for the user to select the desired shell to apply Shellifyr.
-  printf "%sGetting the user's shells installed in the system...%s\n" "$BLUE" "$NORMAL"
+  _fmt_info "Getting the user's shells installed in the system..." 
   declare -A SHELLS_MAP
   UNIQUE_SHELLS=()
   SORTED_SHELLS=()
@@ -120,9 +173,9 @@ function _shellifyr_install_main {
   for shell in "${UNIQUE_SHELLS[@]}"; do 
     color=$(_get_shell_category_color "$shell")
     case "$color" in 
-      "$GREEN") SORTED_SHELLS+=("1 $shell") ;;
-      "$YELLOW") SORTED_SHELLS+=("2 $shell") ;;
-      "$RED") SORTED_SHELLS+=("3 $shell") ;;
+      "${FMT_GREEN}") SORTED_SHELLS+=("1 $shell") ;;
+      "${FMT_YELLOW}") SORTED_SHELLS+=("2 $shell") ;;
+      "${FMT_RED}") SORTED_SHELLS+=("3 $shell") ;;
     esac
   done
   
@@ -133,30 +186,28 @@ function _shellifyr_install_main {
     _get_shell_category_color "$shell_name"
     echo "[$i] $shell_name"
   done
-  printf '%s\n' "$NORMAL"
+  printf '%s\n' "$FMT_RESET"
 
   # Ask user input
   while true; do 
-    printf '%s' "$BLUE"
-    printf 'Select the shell number to apply Shellifyr: '
-    printf "%s" "$NORMAL"
+    printf '%s%s' "${FMT_BLUE}" 'Select the shell number to apply Shellifyr: '
+    printf '%s' "${FMT_RESET}"
     read -r choice
     if [[ "$choice" =~ ^[0-9]+$ ]] && ((choice >= 0 && choice < ${#SORTED_SHELLS[@]})); then 
       selected_shell="${SORTED_SHELLS[$choice]}"
       break
     else
-      printf '%s%s' "$RED" "Invalid option. Please insert one of the shell numbers available above."   
-      printf '%s\n' "$NORMAL"
+      _fmt_error "Invalid option. Please insert one of the shell numbers available above."   
     fi
   done
-  printf '%s' "$NORMAL"
+  printf '%s\n' "$FMT_RESET"
   
   INIT_FILE=$(_get_ini_value "$selected_shell" "init_file")
   INIT_COMMAND=$(_get_ini_value "$selected_shell" "init_command")
 
   # Verify if the shell is supported
   if [[ -z "$INIT_FILE" || -z "$INIT_COMMAND" ]]; then
-    printf '%s%s%s%s\n' "$RED" "$BOLD" "Shell '$selected_shell' not supported or missing configuration. Deleting ~/.shellifyr..." "$NORMAL"
+    _fmt_fatal "Shell '$selected_shell' not supported or missing configuration. Deleting ~/.shellifyr..." "$NORMAL"
     rm -rf ~/.shellifyr
     exit 1
   fi
@@ -165,9 +216,8 @@ function _shellifyr_install_main {
     echo "$INIT_COMMAND" >> "$HOME/$INIT_FILE"
   fi
 
-  printf '%s%s' "$BLUE" "Generating your .shellifyrc file."
+  _fmt_info "Generating your .shellifyrc file."
   echo "$(cat $HOME/.shellifyr/templates/.shellifyrrc)" > "$HOME/.shellifyrrc"
-  printf '%s\n' "$NORMAL"
 
   _shellifyr_install_banner $selected_shell
 }
