@@ -6,8 +6,8 @@ set -e
 GITHUB_REPO="https://github.com/Shellifyr/shellifyr.git"
 
 # Shell Development Category Defining
-STABLE_SHELLS=()
-WIP_SHELLS=("bash zsh")
+STABLE_SHELLS=("bash zsh")
+WIP_SHELLS=()
 
 # The [ -t 1 ] check only works when the function is not called from
 # a subshell (like in `$(...)` or `(...)`, so this hack redefines the

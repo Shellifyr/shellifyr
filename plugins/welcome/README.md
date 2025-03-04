@@ -1,5 +1,7 @@
 # Welcome
 
+### Shell Compatibility: `bash`, `zsh`
+
 This plugin simply displays a welcome message to the user, every time a new session is launched.
 
 To use it, add `welcome` to the plugins array in your `.shellifyrrc` file.
