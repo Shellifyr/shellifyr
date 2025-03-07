@@ -49,7 +49,6 @@ function _supports_truecolor {
 function _setup_color {
   # Only use colors if connected to a terminal
   if ! is_tty; then
-    FMT_RAINBOW=""
     FMT_RED=""
     FMT_GREEN=""
     FMT_YELLOW=""
@@ -59,34 +58,24 @@ function _setup_color {
     return
   fi
 
-  if _supports_truecolor; then
-    FMT_RAINBOW="
-      $(printf '\033[38;2;255;0;0m')
-      $(printf '\033[38;2;255;97;0m')
-      $(printf '\033[38;2;247;255;0m')
-      $(printf '\033[38;2;0;255;30m')
-      $(printf '\033[38;2;77;0;255m')
-      $(printf '\033[38;2;168;0;255m')
-      $(printf '\033[38;2;245;0;172m')
-    "
-  else
-    FMT_RAINBOW="
-      $(printf '\033[38;5;196m')
-      $(printf '\033[38;5;202m')
-      $(printf '\033[38;5;226m')
-      $(printf '\033[38;5;082m')
-      $(printf '\033[38;5;021m')
-      $(printf '\033[38;5;093m')
-      $(printf '\033[38;5;163m')
-    "
+  # We can't only add the color codes to the variables, we need to assign a shell readable
+  # code that tells the shell to ignore their respetive width, in order to solve terminal
+  # line break bugs. These change depending on the shell, as shown below.
+  if [ "$SHELL_NAME" = "bash" ]; then
+    FMT_RED=$(printf '\[\033[31m\]')
+    FMT_GREEN=$(printf '\[\033[32m\]')
+    FMT_YELLOW=$(printf '\[\033[33m\]')
+    FMT_BLUE=$(printf '\[\033[34m\]')
+    FMT_BOLD=$(printf '\[\033[1m\]')
+    FMT_RESET=$(printf '\[\033[0m\]')
+  elif [ "$SHELL_NAME" = "zsh" ]; then
+    FMT_RED='%F{red}'
+    FMT_GREEN='%F{green}'
+    FMT_YELLOW='%F{yellow}'
+    FMT_BLUE='%F{blue}'
+    FMT_BOLD='%B'
+    FMT_RESET='%f%b'
   fi
-
-  FMT_RED=$(printf '\033[31m')
-  FMT_GREEN=$(printf '\033[32m')
-  FMT_YELLOW=$(printf '\033[33m')
-  FMT_BLUE=$(printf '\033[34m')
-  FMT_BOLD=$(printf '\033[1m')
-  FMT_RESET=$(printf '\033[0m')
 }
 _setup_color
 
