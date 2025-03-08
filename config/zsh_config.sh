@@ -85,12 +85,16 @@ function _setup_color {
 
 _setup_color
 
+
+function _fmt_debug {
+  print -P "${FMT_BOLD}DEBUG: ${FMT_BLUE}$*${FMT_RESET}"
+}
+
 # Checks if the config file exists
 if [[ -f "$CONFIG_FILE" ]]; then
   source "$CONFIG_FILE"
   if [[ $DEBUG_MODE == true ]]; then
-    printf '%s%s' "$FMT_BLUE" "DEBUG: sourced '$CONFIG_FILE'."
-    printf '%s\n' "$FMT_RESET"
+    _fmt_debug "sourced '$CONFIG_FILE'."
   fi
 else
   printf '%s%s%s' "$FMT_RED" "$FMT_BOLD" "FATAL: .shellifyrrc not found."
@@ -106,13 +110,11 @@ for plugin in "${PLUGINS[@]}"; do
     COMPATIBILITY=$(awk -F ': ' '/^# Shell:/ {print $2}' "$PLUGIN_FILE")
     if [[ -z "$COMPATIBILITY" || "$COMPATIBILITY" == *"$CURRENT_SHELL"* ]]; then 
       if [[ $DEBUG_MODE == true ]]; then
-        printf '%s%s' "$FMT_BLUE" "DEBUG: loading '$plugin' plugin..."
-        printf '%s\n' "$FMT_RESET"
+        _fmt_debug "loading '$plugin' plugin..."
       fi
       source "$PLUGIN_FILE"
       if [[ $DEBUG_MODE == true ]]; then
-        printf '%s%s' "$FMT_BLUE" "DEBUG: loaded '$plugin' plugin."
-        printf '%s\n' "$FMT_RESET"
+        _fmt_debug "loaded '$plugin' plugin."
       fi
     else 
       printf '%s%s%s' "$FMT_YELLOW" "$FMT_BOLD" "Plugin '$plugin' not compatible with $CURRENT_SHELL (only with: $COMPATIBILITY)."
@@ -133,8 +135,7 @@ if [[ -f "$THEME_FILE" ]]; then
 
   if [[ -z "$COMPATIBILITY" || "$COMPATIBILITY" == *"$CURRENT_SHELL"* ]]; then 
     if [[ $DEBUG_MODE == true ]]; then 
-      printf '%s%s' "$FMT_BLUE" "DEBUG: '$SHYR_THEME' loading."
-      printf '%s\n' "$FMT_RESET"
+      _fmt_debug "'$SHYR_THEME' loading."
     fi
     source "$THEME_FILE"
 
@@ -144,8 +145,7 @@ if [[ -f "$THEME_FILE" ]]; then
     fi
 
     if [[ $DEBUG_MODE == true ]]; then 
-      printf '%s%s' "$FMT_BLUE" "DEBUG: '$SHYR_THEME' theme successfully loaded."
-      printf '%s\n' "$FMT_RESET"
+      _fmt_debug "'$SHYR_THEME' theme successfully loaded."
     fi
   else 
     printf '%s%s%s' "$FMT_YELLOW" "$FMT_BOLD" "Theme '$SHYR_THEME' not compatible with $CURRENT_SHELL (only with: $COMPATIBILITY)."

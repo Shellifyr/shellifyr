@@ -58,23 +58,20 @@ function _setup_color {
     return
   fi
 
-  # We can't only add the color codes to the variables, we need to assign a shell readable
-  # code that tells the shell to ignore their respetive width, in order to solve terminal
-  # line break bugs. These change depending on the shell, as shown below.
   if [ "$SHELL_NAME" = "bash" ]; then
-    FMT_RED=$(printf '\[\033[31m\]')
-    FMT_GREEN=$(printf '\[\033[32m\]')
-    FMT_YELLOW=$(printf '\[\033[33m\]')
-    FMT_BLUE=$(printf '\[\033[34m\]')
-    FMT_BOLD=$(printf '\[\033[1m\]')
-    FMT_RESET=$(printf '\[\033[0m\]')
+    FMT_RED=$(printf '\033[31m')
+    FMT_GREEN=$(printf '\033[32m')
+    FMT_YELLOW=$(printf '\033[33m')
+    FMT_BLUE=$(printf '\033[34m')
+    FMT_BOLD=$(printf '\033[1m')
+    FMT_RESET=$(printf '\033[0m')
   elif [ "$SHELL_NAME" = "zsh" ]; then
-    FMT_RED='%F{red}'
-    FMT_GREEN='%F{green}'
-    FMT_YELLOW='%F{yellow}'
-    FMT_BLUE='%F{blue}'
-    FMT_BOLD='%B'
-    FMT_RESET='%f%b'
+    FMT_RED=$(printf '\033[31m')
+    FMT_GREEN=$(printf '\033[32m')
+    FMT_YELLOW=$(printf '\033[33m')
+    FMT_BLUE=$(printf '\033[34m')
+    FMT_BOLD=$(printf '\033[1m')
+    FMT_RESET=$(printf '\033[0m')
   fi
 }
 _setup_color
@@ -87,19 +84,20 @@ function _git_prompt_info {
 }
 
 # Prompt Style
-# If you know the differenecs between bash and zsh, you may know that zsh doesn't know 
+# If you know the differences between bash and zsh, you may know that zsh doesn't know 
 # what "\w" means. To solve that and show the directory in both bash in zsh
 # we need to treat the Shell's differently. In this example, I use the SHELL_NAME
 # variable that was set up in the start of the file to set up the prompt correctly.
+# The PS1 variable MUST have an ASCII code that tells the prompt to ignore the color code's length.
 function _update_prompt {
   if [ "$SHELL_NAME" = "bash" ]; then
-    PS1="${FMT_BLUE}➡️   \w ${FMT_BOLD}$(_git_prompt_info) ${FMT_RESET}$ "
+    PS1="\[\e[34m\]➡️  \w \[\e[1m\]$(_git_prompt_info) \[\e[0m\]\$ "
   elif [ "$SHELL_NAME" = "zsh" ]; then
-    PS1="${FMT_BLUE}➡️   %~ ${FMT_BOLD}$(_git_prompt_info) ${FMT_RESET}$ "
+    PS1="%{%F{blue}%}➡️  %~ %{%B%}$(_git_prompt_info) %{%b%f%}$ "
   fi
 }
 
-# Config for each shell
+# Config for each shell. 
 if [ "$SHELL_NAME" = "zsh" ]; then
   precmd() { _update_prompt; }  
   export PROMPT="$PS1"

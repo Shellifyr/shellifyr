@@ -12,7 +12,7 @@ WIP_SHELLS=()
 # The [ -t 1 ] check only works when the function is not called from
 # a subshell (like in `$(...)` or `(...)`, so this hack redefines the
 # function at the top level to always return false when stdout is not
-# a tty.
+# a tty. This code was taken from oh my zsh repository.
 if [ -t 1 ]; then
   is_tty() {
     true
