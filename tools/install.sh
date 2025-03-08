@@ -220,6 +220,7 @@ function _shellifyr_install_main {
   echo "$(cat $HOME/.shellifyr/templates/.shellifyrrc)" > "$HOME/.shellifyrrc"
 
   _shellifyr_install_banner $selected_shell
+  source $HOME/$INIT_FILE
 }
 
 _shellifyr_install_main
