@@ -129,7 +129,7 @@ function _get_shell_category_color {
 
 function _shellifyr_install_banner {
   local shell=$1
-  printf '%s%s%s\n' "${FMT_GREEN}" "$shell is now SHELLIFYED!" "${FMT_RESET}"
+  printf '%s%s%s\n' "${FMT_GREEN}" "$shell is now SHELLIFYED! Please restart your terminal." "${FMT_RESET}"
 }
 
 function _shellifyr_install_main {
@@ -224,7 +224,6 @@ function _shellifyr_install_main {
   chmod +x $HOME/.shellifyr/tools/*
 
   _shellifyr_install_banner $selected_shell
-  source $HOME/$INIT_FILE
 }
 
 _shellifyr_install_main
