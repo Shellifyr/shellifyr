@@ -6,6 +6,9 @@ CONFIG_FILE="$HOME/.shellifyrrc"
 PLUGINS_DIR="$SHELLIFYR_HOME/plugins"
 THEMES_DIR="$SHELLIFYR_HOME/themes"
 
+# exporting path
+export PATH="$SHELLIFYR_HOME/bin:$PATH"
+
 # Current shell name
 CURRENT_SHELL="zsh"
 

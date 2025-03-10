@@ -9,9 +9,9 @@ This roadmap defines the main steps for Shellifyr's project, this will change ac
 - [X] Create an example plugin.
 
 ## 🔄 **v0.2:** Update Commands and Theme Support
-- [ ] Create a `bin/` folder that will contain commands for the user's terminal.
+- [X] Create a `bin/` folder that will contain commands for the user's terminal.
 - [X] Create a **theme system** (`themes/`).
-- [ ] Create a `shellifyr update` command for updating.
+- [X] Create a `shellifyr update` command for updating.
 - [X] Create a default theme.
 
 ## 🛠 **v0.3:** Better UX and Implementing a New Shell

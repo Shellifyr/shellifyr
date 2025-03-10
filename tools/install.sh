@@ -23,7 +23,7 @@ else
   }
 fi
 
-function _supports_truecolor {
+supports_truecolor() {
   case "$COLORTERM" in
   truecolor|24bit) return 0 ;;
   esac
@@ -39,7 +39,7 @@ function _supports_truecolor {
   return 1
 }
 
-function _setup_color {
+setup_color() {
   # Only use colors if connected to a terminal
   if ! is_tty; then
     FMT_RAINBOW=""
@@ -52,7 +52,7 @@ function _setup_color {
     return
   fi
 
-  if _supports_truecolor; then
+  if supports_truecolor; then
     FMT_RAINBOW="
       $(printf '\033[38;2;255;0;0m')
       $(printf '\033[38;2;255;97;0m')
@@ -133,7 +133,7 @@ function _shellifyr_install_banner {
 }
 
 function _shellifyr_install_main {
-  _setup_color
+  setup_color
   if [[ -d "$HOME/.shellifyr" ]]; then
     printf '%s%s' "${FMT_YELLOW}" "Shellifyr's repository is already installed in your system, would you like to re-install it? [y/N]: " 
     read -r reinstall_choice
@@ -216,8 +216,12 @@ function _shellifyr_install_main {
     echo "$INIT_COMMAND" >> "$HOME/$INIT_FILE"
   fi
 
-  _fmt_info "Generating your .shellifyrc file."
+  _fmt_info "Generating your .shellifyrc file..."
   echo "$(cat $HOME/.shellifyr/templates/.shellifyrrc)" > "$HOME/.shellifyrrc"
+
+  _fmt_info "Giving execution rights to shellifyr's binary files..."
+  chmod +x $HOME/.shellifyr/bin/shellifyr
+  chmod +x $HOME/.shellifyr/tools/*
 
   _shellifyr_install_banner $selected_shell
   source $HOME/$INIT_FILE

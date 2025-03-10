@@ -5,6 +5,9 @@ export SHELLIFYR_HOME="$HOME/.shellifyr"
 CONFIG_FILE="$HOME/.shellifyrrc"
 PLUGINS_DIR="$SHELLIFYR_HOME/plugins"
 
+# exporting path
+export PATH="$SHELLIFYR_HOME/bin:$PATH"
+
 # Current shell name
 CURRENT_SHELL="bash"
 
