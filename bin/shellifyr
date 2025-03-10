@@ -1,20 +1,59 @@
 #!/bin/sh
 
-# Help command
-function show_help {
+# some useful functions
+_get_ini_value() {
+  local section=$1
+  local key=$2
+  awk -F '=' -v section="$section" -v key="$key" '
+    $0 ~ "\\["section"\\]"{flag=1}
+    flag && $1 ~ key {print $2; exit}
+  ' $SHELLIFYR_HOME/shell_paths.ini
+}
+
+# Help command functions
+_fmt_help_title() {
+  echo "$1"
   echo ""
-  echo "use: shellifyr <command>"
-  echo ""
-  echo "here is a list of all the commands available:"
-  echo ""
-  echo "  update - updates shellifyr's repository"
-  echo ""
+}
+
+_fmt_help_command() {
+  echo "  $1 - $2"
+}
+
+show_help() {
+  _fmt_help_title "use: shellifyr <command> [options]"
+  _fmt_help_title "here is a list of all the commands available:"
+  _fmt_help_command "update" "updates shellifyr's repository"
+  _fmt_help_command "new <shell>" "installs shellifyr and sets up its configuration to a new shell"
+}
+
+new_command() {
+  selected_shell=$1
+
+  INIT_FILE=$(_get_ini_value "$selected_shell" "init_file")
+  INIT_COMMAND=$(_get_ini_value "$selected_shell" "init_command")
+
+  # check if selected shell is empty
+  if [[ -z "$selected_shell" ]]; then
+    echo "You need to specify a shell! Ex: 'shellifyr new bash'."
+    exit 1
+  fi
+
+  # Verify if the shell is supported
+  if [[ -z "$INIT_FILE" || -z "$INIT_COMMAND" ]]; then
+    echo "Shell '$selected_shell' not supported or missing configuration."
+    exit 1
+  fi
+
+  if ! grep -q "$INIT_COMMAND" "$HOME/$INIT_FILE"; then
+    echo "$INIT_COMMAND" >> "$HOME/$INIT_FILE"
+    echo "Successfully configured!"
+  fi
 }
 
 function main {
   if [ $# -eq 0 ]; then
-    echo "Error: No command was given."
-    show_help
+    echo "Error: No command was given. Try 'shellifyr help'."
     exit 1
   fi 
 
@@ -25,9 +64,12 @@ function main {
     help)
       show_help
       ;;
+    new)
+      new_command $2
+      ;;
     *)
       echo "Unknown command: $1"
-      show_help
+      echo "Type 'shellifyr help' for a list of commands."
       exit 1
       ;;
   esac

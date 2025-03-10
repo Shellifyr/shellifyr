@@ -15,7 +15,7 @@ This roadmap defines the main steps for Shellifyr's project, this will change ac
 - [X] Create a default theme.
 
 ## 🛠 **v0.3:** Better UX and Implementing a New Shell
-- [ ] Create a `shellifyr new` command for adding the configuration to a new shell.
+- [X] Create a `shellifyr new` command for adding the configuration to a new shell.
 - [ ] Add Fish support.
 
 ## 🛠 **v1.0:** First Release!
